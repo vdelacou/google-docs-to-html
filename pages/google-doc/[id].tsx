@@ -22,25 +22,26 @@ const HtmlDocs = () => {
 
   useEffect(() => {
     const accessToken = localStorage.getItem("GOOGLE_ACCESS_TOKEN");
-    const refreshToken = localStorage.getItem("GOOGLE_REFRESH_TOKEN");
+    // const refreshToken = localStorage.getItem("GOOGLE_REFRESH_TOKEN");
 
-    if (router.asPath && !accessToken || !refreshToken) {
+    if (router.asPath && !accessToken) {
      router.push(`/authorize-url?state=${router.asPath}`);
+     return;
     }
     if (router.query.id) {
       fetch(
-        `/api/google/${router.query.id}?accessToken=${accessToken}&refreshToken=${refreshToken}`
+        `/api/google/${router.query.id}?accessToken=${accessToken}`
       )
         .then(async result => {
           const json = await result.json();
           if (json.statusCode === 200) {
             setData(json);
           } else {
-              setError(json.message);
+            setError(json.message);
           }
         })
-        .catch(e => {
-          setError(e.message);
+        .catch((e) => {
+         setError(`${JSON.stringify(e)}`);
         });
     }
   }, [router]);
@@ -82,18 +83,5 @@ const HtmlDocs = () => {
   );
 };
 
-// This function gets called at build time on server-side.
-// It won't be called on client-side, so you can even do
-// direct database queries.
-// export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-//   try {
-//     const id = params?.id
-//     const data = await fetch(`http://localhost:3000/api/google/${id}`)
-//     const json = await data.json();
-//     return { props: { docHtml: json.html } }
-//   } catch (err) {
-//     return { props: { errors: err.message } }
-//   }
-// }
 
 export default HtmlDocs;

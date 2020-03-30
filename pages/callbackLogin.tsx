@@ -7,22 +7,19 @@ import { useRouter } from "next/router";
 type Props = {
   errors: string;
   access_token: string;
-  refresh_token: string;
   state: string;
 };
 
 const CallbackLoginPage = ({
   errors,
   access_token,
-  refresh_token,
   state
 }: Props) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (access_token && refresh_token) {
+    if (access_token) {
       localStorage.setItem("GOOGLE_ACCESS_TOKEN", access_token);
-      localStorage.setItem("GOOGLE_REFRESH_TOKEN", refresh_token);
       router.push(state);
     }
   }, []);
@@ -30,7 +27,7 @@ const CallbackLoginPage = ({
   if (errors) {
     return <h1>{errors}</h1>;
   }
-  if(state) {
+  if (state) {
     return null;
   }
   return <h1>Thank you for sign in</h1>;
@@ -52,7 +49,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     return {
       props: {
         access_token: data.tokens.access_token,
-        refresh_token: data.tokens.refresh_token,
+       // refresh_token: data.tokens.refresh_token,
         state: state
       }
     };

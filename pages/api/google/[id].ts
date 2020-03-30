@@ -5,14 +5,13 @@ import { google } from "googleapis";
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const {
-      query: { id, accessToken, refreshToken }
+      query: { id, accessToken }
     } = req;
 
-    console.log("accessToken", accessToken);
     if (id === undefined) {
       throw new Error("No Google Id");
     }
-    if (accessToken === undefined || refreshToken === undefined) {
+    if (accessToken === undefined) {
       throw new Error("No Tokens");
     }
     const oAuth2Client = new OAuth2Client(
@@ -21,7 +20,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     );
     oAuth2Client.credentials = {
       access_token: accessToken as string,
-      refresh_token: refreshToken as string
+    //  refresh_token: refreshToken as string
     };
     const drive = google.drive({ version: "v3", auth: oAuth2Client });
     const doc = await drive.files.export(
@@ -44,7 +43,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       .json({ statusCode: 200, html: doc.data, title: fileInfo.data.name });
   } catch (err) {
     if (err.message) {
+     
+      try{
       const errorParsed = JSON.parse(err.message);
+    
       if (
         errorParsed &&
         errorParsed.error &&
@@ -61,6 +63,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       } else {
         res.status(500).json({ statusCode: 500, message: err.message });
       }
+    } catch (e) {
+      res.status(500).json({ statusCode: 500, message: err.message });
+    }
     } else {
       res.status(500).json({ statusCode: 500, message: err });
     }
